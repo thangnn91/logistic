@@ -1,6 +1,6 @@
-### Flask Starter Web Development
+### Ứng dụng order hàng Trung Quốc (Python flask)
 
-- You should have Python Environment before install flask-starter app
+- Cấu trúc project và cài đặt môi trường
   - python3
   - virtualenv
   - pip3
