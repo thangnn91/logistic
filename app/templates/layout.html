@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="app">
+
+<head>
+<meta charset="utf-8" />
+<title>Logistic system</title>
+<meta name="description"
+	content="app, web app, responsive, admin dashboard, admin, flat, flat ui, ui kit, off screen nav" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, maximum-scale=1" />
+<link href="{{ url_for('static', filename = 'css/font.css') }}"
+	rel="stylesheet">
+<link
+	href="{{ url_for('static', filename = 'js/calendar/bootstrap_calendar.css') }}"
+	rel="stylesheet">
+<link rel="stylesheet" type="text/css"
+	href="{{ url_for('static', filename = 'js/datepicker/datepicker.css') }}" />
+<link rel="stylesheet"
+	href="{{ url_for('static', filename = 'js/slider/slider.css') }}"
+	type="text/css">
+<link href="{{ url_for('static', filename = 'css/app.v1.css') }}"
+	rel="stylesheet">
+<link rel="stylesheet" type="text/css"
+	href="{{ url_for('static', filename = 'css/datatables.css') }}" />
+<link rel="stylesheet" type="text/css"
+	href="{{ url_for('static', filename = 'js/pagination/pagination.css') }}" />
+<link
+	href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css"
+	rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+<script src="{{ url_for('static', filename = 'js/app.v1.js') }}"></script>
+<!--[if lt IE 9]> <script src="js/ie/html5shiv.js"></script> <script src="js/ie/respond.min.js"></script> <script src="js/ie/excanvas.js"></script> <![endif]-->
+</head>
+
+<body class="">
+	{% with messages = get_flashed_messages() %} {% if messages %} {% for
+	message in messages %}
+	<script type="text/javascript">
+		$(function() {
+			$.toast({
+				heading : 'Có lỗi xảy ra',
+				text : "{{ message }}",
+				position : 'bottom-right',
+				icon : 'error'
+			})
+		})
+	</script>
+	{% endfor %} {% endif %} {% endwith %}
+	<section class="vbox">
+		{% include 'admin/header.html' %}
+		<section>
+
+			<section class="hbox stretch">
+				{% include 'admin/menuleft.html' %}
+				<section id="content">{% block content %}{% endblock %}</section>
+				<aside class="bg-light lter b-l aside-md hide" id="notes">
+					<div class="wrapper">Notification</div>
+				</aside>
+			</section>
+		</section>
+	</section>
+	<!-- Bootstrap -->
+	<!-- App -->
+
+	<script type="text/javascript">
+		$(function() {
+			var pathname_ilzl = window.location.pathname;
+			var $current_a_tag = $('#nav_left').find(
+					'a[href$="' + pathname_ilzl + '"]:first');
+			$current_a_tag.addClass('active');
+			$current_a_tag.parent('li').addClass('active');
+			$current_a_tag.parents('.root-li').addClass('active');
+		});
+	</script>
+
+	<script
+		src="{{ url_for('static', filename = 'js/charts/easypiechart/jquery.easy-pie-chart.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/charts/sparkline/jquery.sparkline.min.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/charts/flot/jquery.flot.min.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/charts/flot/jquery.flot.tooltip.min.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/charts/flot/jquery.flot.grow.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/charts/flot/demo.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/datepicker/bootstrap-datepicker.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/calendar/bootstrap_calendar.js') }}"></script>
+	<script src="{{ url_for('static', filename = 'js/calendar/demo.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/sortable/jquery.sortable.js') }}"></script>
+	<script src="{{ url_for('static', filename = 'js/app.plugin.js') }}"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/pagination/pagination.js') }}"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js"></script>
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
+	<script
+		src="{{ url_for('static', filename = 'js/slider/bootstrap-slider.js') }}"></script>
+	<script type="text/javascript"
+		src="https://cdn.datatables.net/v/dt/dt-1.10.20/datatables.min.js"></script>
+
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
+	<script src="{{ url_for('static', filename = 'js/custom.js') }}"></script>
+</body>
+
+</html>

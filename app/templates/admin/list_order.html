@@ -1,0 +1,289 @@
+{% extends "./layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					quản trị</a></li>
+			<li><a href="#">Đơn hàng</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default">
+						<header class="panel-heading font-bold">Danh sách đơn
+							hàng</header>
+						<div class="panel-body">
+
+							<div class="form-inline form-horizontal" role="form">
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-2">
+										<label>Từ ngày</label><input id="from_time"
+											class="datepicker-input form-control col-md-5" size="16"
+											type="text" value="" data-date-format="dd/mm/yyyy">
+									</div>
+									<div class="col-sm-2">
+										<label>Đến ngày</label><input id="to_time"
+											class="datepicker-input form-control col-md-5" size="16"
+											type="text" value="" data-date-format="dd/mm/yyyy">
+									</div>
+									<div class="col-sm-2">
+										<label>Mã đơn hàng</label><input id="order_code"
+											class="form-control col-md-5" type="text" value="">
+									</div>
+									<div class="col-sm-2">
+										<label>Trạng thái</label><select id="order_type"
+											class="form-control m-b">
+											<option value="">Tất cả</option>
+											<option value="0">Khởi tạo</option>
+											<option value="1">Đã cọc</option>
+											<option value="2">Đã đặt hàng</option>
+											<option value="3">Hàng về kho quốc tế</option>
+											<option value="4">Đang ship về VN</option>
+											<option value="5">Đã tới kho VN</option>
+											<option value="6">Đang giao nội địa</option>
+											<option value="7">Hoàn thành</option>
+										</select>
+									</div>
+									<div class="col-sm-2">
+										<a type="button" style="margin-top: 22px;"
+											class="btn btn-default" onclick="InitDatatable(1);">Tìm
+											kiếm</a>
+									</div>
+								</div>
+
+
+							</div>
+
+							<div class="table-responsive m-t-sm">
+								<table id="example_dtb"
+									class="table table-striped m-b-none dataTable no-footer"
+									style="width: 100%">
+									<thead>
+										<tr>
+											<th>Mã đơn hàng</th>
+											<th>Giá tạm tính</th>
+											<th>Khách đã cọc</th>
+											<th>Trạng thái</th>
+											<th>Thao tác</th>
+										</tr>
+									</thead>
+									<tbody id="data-container">
+									</tbody>
+								</table>
+							</div>
+							<div id="pagination-container"></div>
+						</div>
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+
+<div class="modal fade" id="modal-form">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-sm-12 b-r">
+						<h3 class="m-t-none m-b">Cập nhật đơn hàng nhanh</h3>
+						<form id="depositForm" data-method="POST"
+							data-action="/admin/deposit" role="form">
+							<input class="data-hidden" name="id" id="id" type="hidden">
+							<div class="form-group pull-in clearfix">
+								<div class="col-sm-6">
+									<label>Mã đơn hàng</label> <input id="order_code"
+										name="order_code" type="text"
+										class="form-control parsley-validated" disabled="disabled"
+										placeholder="Eg: YYXYYT" data-required="true">
+								</div>
+								<div class="col-sm-6">
+									<label>Giá tạm tính</label> <input id="price_vnd" type="text"
+										name="price_vnd" class="form-control parsley-validated"
+										placeholder="Eg: 100000000" onkeyup="keypressMoney(this);"
+										onkeyup=""> <i data-function="formatMoney">0</i>&nbsp<sup>đ</sup>
+								</div>
+							</div>
+							<div class="form-group pull-in clearfix">
+								<div class="col-sm-6">
+									<label>Người dùng cọc</label> <input type="text"
+										id="user_deposit" class="form-control" name="user_deposit"
+										placeholder="Eg: 17000000" onkeyup="keypressMoney(this);">
+									<i data-function="formatMoney">0</i>&nbsp<sup>đ</sup>
+								</div>
+								<div class="col-sm-6">
+									<label>Cân nặng</label> <input type="text" id="total_weight"
+										class="form-control" name="total_weight" placeholder="Eg: 20"
+										onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/[^0-9.]+/g, '');">
+								</div>
+							</div>
+							<div class="form-group">
+								<label>Tổng chi phí</label> <input type="text" id="final_price"
+									class="form-control" name="final_price"
+									placeholder="Eg: 17000000" onkeyup="keypressMoney(this);">
+								<i>0</i>&nbsp<sup>đ</sup>&nbsp<span>434233</span>
+							</div>
+							<div class="form-group pull-in clearfix">
+								<div class="col-sm-6">
+									<label>Trạng thái hiện tại</label> <input type="text"
+										id="old_status" class="form-control" disabled="disabled">
+								</div>
+								<div class="col-sm-6">
+									<label>Trạng thái</label> <select id="order_status"
+									class="form-control m-b">
+								</select>
+								</div>
+							</div>
+							<div class="checkbox m-t-lg">
+								<button
+									onclick="business_function.submitDepositForm('depositForm');"
+									type="button"
+									class="btn btn-sm btn-success pull-right text-uc m-t-n-xs">
+									<strong>Submit</strong>
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
+</div>
+
+<script type="text/template" id="table-body">
+    <% for (var i = 0, len = data.length; i < len; i++) { %>
+		<tr>
+			<td><%= data[i].order_code %></td>
+			<td><%= formatMoney(data[i].price_vnd) %><sup>đ</sup></td>
+			<td><%= data[i].user_deposit ? formatMoney(data[i].user_deposit) : '0' %><sup>đ</sup></td>
+			<td><%= business_function.getOrderStatusText(data[i].status) %></td>	
+			<td>
+				<% if (data[i].type != 1) { %>
+					<a title="Chi tiết đơn hàng" class="btn btn-default btn-xs active" href="/admin/order-detail?code=<%= data[i].order_code + '.' + data[i].id %>"><i class="fa fa-comments-o"></i></a>
+					<a title="Cập nhật nhanh" onclick="QuickEdit(<%= data[i].id %>);" class="btn btn-default btn-xs m-l-5" href="javascript:;"><i class="fa fa-edit"></i></a>
+				<% } %>
+			</td>
+	</tr>
+    <% } %>
+</script>
+
+<script type="text/javascript">
+	var list_fee_pqved = "{{ list_fee }}";
+	var elem = document.createElement('textarea');
+	elem.innerHTML = list_fee_pqved;
+	var arrayFee = JSON.parse(elem.value);
+	var csrf_token_btivy = "{{ csrf_token() }}";
+	var arrayLoaded = [];
+	$(function() {
+		var d_qmvla = new Date();
+		var fromDateInit = d_qmvla.getDate().toString().padStart(2, '0') + "/"
+				+ (d_qmvla.getMonth()).toString().padStart(2, '0') + "/"
+				+ d_qmvla.getFullYear();
+		var toDateInit = d_qmvla.getDate().toString().padStart(2, '0') + "/"
+				+ (d_qmvla.getMonth() + 1).toString().padStart(2, '0') + "/"
+				+ d_qmvla.getFullYear();
+		$('#from_time').val(fromDateInit);
+		$('#to_time').val(toDateInit);
+		InitDatatable(1);
+	});
+
+	function InitDatatable(page) {
+		$('#data-container').html("<tr><td>Đang lấy dữ liệu!!!!</td></tr>");
+		$.ajax({
+			type : 'POST',
+			data : {
+				"page" : page,
+				"status" : $('#order_type').val(),
+				"order_code" : $('#order_code').val(),
+				"from_time" : $('#from_time').val(),
+				"to_time" : $('#to_time').val(),
+				"csrf_token" : csrf_token_btivy
+			},
+			url : '/admin/list-order',
+			success : function(response) {
+				arrayLoaded = response.data;
+				var template = _.template($('#table-body').html())({
+					data : response.data
+				});
+				$('#data-container').html(template);
+				$("#pagination-container").pagination({
+					items : response.total,
+					itemsOnPage : response.limit,
+					cssStyle : 'light-theme',
+					currentPage : page,
+					onPageClick : function(pageNum) {
+						InitDatatable(pageNum)
+					}
+				});
+			}
+		});
+	}
+
+	function QuickEdit(id) {
+		var editObject = arrayLoaded.find(function(el) {
+			return el.id === id;
+		});
+		if (!editObject)
+			return;
+
+		for ( var key in editObject) {
+			if(key === 'final_price'){
+				//Tim trong array fee nam de tinh phi dich vu
+				var feeServiceObject = arrayFee.find(function(el) {
+					return (el.type === 1 && el.from_value * 1000000 < editObject['price_vnd'] && el.to_value * 1000000 > editObject['price_vnd']);
+				});
+				var finalTempFee = ~~(editObject['price_vnd'] + editObject['price_vnd'] * (feeServiceObject.fee / 100));
+				$('#final_price').val(finalTempFee);
+				var finalDesc = formatMoney(finalTempFee);
+				$('#final_price').siblings('i').text(finalDesc);
+				$('#final_price').siblings('span').text('('+feeServiceObject.fee+'% phí dịch vụ)');
+				continue;
+			}
+			$('#modal-form #' + key).val(editObject[key]);
+			if ($('#modal-form #' + key).siblings('i').length) {
+				var $iElm = $('#modal-form #' + key).siblings('i');
+				if ($iElm.data("function"))
+					$iElm.text(window[$iElm.data("function")](editObject[key]));
+			}						
+		}
+		$('#old_status').val(business_function.getOrderStatusText(editObject['status']));
+		var drdStatus = `<option value="0">Khởi tạo</option>
+			<option value="1">Đã cọc</option>
+			<option value="2">Đã đặt hàng</option>
+			<option value="3">Hàng về kho quốc tế</option>
+			<option value="4">Đang ship về VN</option>
+			<option value="5">Đã tới kho VN</option>
+			<option value="6">Đang giao nội địa</option>
+			<option value="7">Hoàn thành</option>
+			<option value="8">Nghi vấn</option>
+			<option value="9">Hủy</option>`;
+			
+		
+		var account_type_lfmade = $('#30315ecf55f17103458c08365556d661').val();
+		if(account_type_lfmade === 'BUYER')
+			drdStatus = `<option value="2">Đã đặt hàng</option>
+						<option value="3">Hàng về kho quốc tế</option>
+						<option value="4">Đang ship về VN</option>`;
+		else if(account_type_lfmade === 'SHIPPER')	
+			drdStatus = `<option value="6">Đang giao nội địa</option>
+						<option value="7">Hoàn thành</option>`;
+						
+						
+		$('#order_status').html(drdStatus);
+		
+		$('#modal-form').modal('show');
+	}
+	
+	function keypressMoney(t){
+		if (/\D/g.test(t.value))
+			t.value = t.value.replace(/\D/g, '');	
+		var value = t.value;
+		var moneyFormat = formatMoney(value);
+		$(t).siblings('i').text(moneyFormat);
+	}
+</script>
+{% endblock %}

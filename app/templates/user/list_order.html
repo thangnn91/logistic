@@ -1,0 +1,172 @@
+{% extends "./user_layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					quản trị</a></li>
+			<li><a href="#">Đơn hàng</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default">
+						<div class="panel-heading">
+							<span class="btn-group pull-right"><a
+								href="/dashboard/create-order" class="btn btn-info btn-sm">Tạo
+									đơn hàng</a> </span>
+							<h5 class="font-bold">Danh sách đơn hàng</h5>
+						</div>
+						<div class="panel-body">
+
+							<div class="form-inline form-horizontal" role="form">
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-3">
+										<label>Từ ngày</label><input id="from_time"
+											class="datepicker-input form-control col-md-5" size="16"
+											type="text" value="" data-date-format="dd/mm/yyyy">
+									</div>
+									<div class="col-sm-3">
+										<label>Đến ngày</label><input id="to_time"
+											class="datepicker-input form-control col-md-5" size="16"
+											type="text" value="" data-date-format="dd/mm/yyyy">
+									</div>
+									<div class="col-sm-3">
+										<label>Trạng thái</label><select id="order_type"
+											name="order_type" class="form-control m-b">
+											<option value="">Tất cả</option>
+											<option value="0">Khởi tạo</option>
+											<option value="1">Đã cọc</option>
+											<option value="2">Đã đặt hàng</option>
+											<option value="3">Hàng về kho quốc tế</option>
+											<option value="4">Đang ship về VN</option>
+											<option value="5">Đã tới kho VN</option>
+											<option value="6">Đang giao nội địa</option>
+											<option value="7">Hoàn thành</option>
+										</select>
+									</div>
+									<div class="col-sm-2">
+										<a type="button" style="margin-top: 22px;"
+											class="btn btn-default" onclick="InitDatatable();">Tìm kiếm</a>
+									</div>
+								</div>
+
+
+							</div>
+
+							<div class="table-responsive m-t-sm">
+								<table id="example_dtb"
+									class="table table-striped m-b-none dataTable no-footer"
+									style="width: 100%">
+									<thead>
+										<tr>
+											<th>Mã đơn hàng</th>
+											<th>Sản phẩm</th>
+											<th>Giá tạm tính</th>
+											<th>Trạng thái</th>
+											<th>Thao tác</th>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>
+												Không có dữ liệu
+											<td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+<script type="text/javascript">
+	$(function() {
+		$(function() {
+			var d_qmvla = new Date();
+			var fromDateInit = d_qmvla.getDate().toString().padStart(2, '0')
+					+ "/" + (d_qmvla.getMonth()).toString().padStart(2, '0')
+					+ "/" + d_qmvla.getFullYear();
+			var toDateInit = d_qmvla.getDate().toString().padStart(2, '0')
+					+ "/"
+					+ (d_qmvla.getMonth() + 1).toString().padStart(2, '0')
+					+ "/" + d_qmvla.getFullYear();
+			$('#from_time').val(fromDateInit);
+			$('#to_time').val(toDateInit);
+			//InitDatatable(0);
+		});
+	});
+
+	//0: khoi tao, 1: click btn
+	function InitDatatable(type) {
+		$('#example_dtb')
+				.DataTable(
+						{
+							"bProcessing" : true,
+							"sDom" : "<'row'<'col-sm-6'l><'col-sm-6'f>r>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+							"sPaginationType" : "full_numbers",
+							destroy: true,
+							ajax : {
+								url : '/dashboard/list-order',
+								type : "POST",
+								"data" : function(d) {
+									return $.extend({}, d, {
+										"csrf_token" : '{{ csrf_token() }}',
+										"status" : $('#order_type').val(),
+										"from_time" : $('#from_time').val(),
+										"to_time" : $('#to_time').val(),
+									});
+								}
+							},
+							columns : [
+									{
+										"data" : "order_code"
+									},
+									{
+										"data" : "p_name"
+									},
+									{
+										"data" : "price_vnd",
+										render : function(data, type, row) {
+											return '<b style="display:none;">'
+													+ row.order_code
+													+ '</b>'
+													+ formatMoney(row.price_vnd)
+													+ '<sup>đ</sup>';
+										}
+									},
+									{
+										"data" : "status",
+										render : function(data, type, row) {
+											return '<b style="display:none;">'
+													+ row.order_code
+													+ '</b>'
+													+ business_function
+															.getOrderStatusText(row.status);
+										}
+									},
+									{
+										"data" : "",
+										render : function(data, type, row) {
+											var html = '<b style="display:none;">'
+													+ row.order_code
+													+ '</b>'
+													+ '<a title="Chi tiết đơn hàng" class="btn btn-primary" href="/dashboard/order-detail?code='
+													+ row.order_code
+													+ '.'
+													+ row.id
+													+ '"><i class="fa fa-eye"></i></a>&nbsp&nbsp'
+													+ '<a title="Hủy đơn hàng" class="btn btn-danger"><i class="fa fa-trash-o"></i></a>';
+											return html;
+										}
+									} ],
+							"fnDrawCallback" : function(oSettings) {
+								rowspanDTable(oSettings, "example_dtb", 1);
+							}
+						});
+	}
+</script>
+{% endblock %}

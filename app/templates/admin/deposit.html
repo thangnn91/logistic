@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+	{% extends "./layout.html" %} {% block content %}
+	<section class="vbox">
+		<section class="scrollable padder">
+			<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+				<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+						quản trị</a></li>
+				<li><a href="javascript:;">Cấu hình đặt cọc</a></li>
+			</ul>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12">
+						<section class="panel panel-default">
+							<div class="panel-heading">
+								<span class="btn-group pull-right"><a href="#modal-form"
+									data-toggle="modal" class="btn btn-info btn-sm">Thêm mới
+										cấu hình</a> </span>
+								<h5 class="font-bold">Cấu hình đặt cọc</h5>
+							</div>
+							<div class="panel-body">
+								<div class="table-responsive">
+									<table id="example_dtb"
+										class="table table-striped m-b-none dataTable no-footer"
+										style="width: 100%">
+										<thead>
+											<tr>
+												<th>Đơn hàng từ</th>
+												<th>Đơn hàng đến</th>
+												<th>Tỷ giá đặt cọc (% giá trị đơn)</th>
+												<th>Loại trừ tài khoản</th>
+												<th>Thao tác</th>
+											</tr>
+										</thead>
+										<tbody>
+										</tbody>
+									</table>
+								</div>
+							</div>
+
+						</section>
+						<div class="panel-group m-b" id="accordion2">
+							<div class="panel panel-default">
+								<div class="panel-heading">
+									<a class="accordion-toggle" data-toggle="collapse"
+										data-parent="#accordion2" href="#collapseOne"> Hướng dẫn
+										cấu hình đặt cọc &nbsp<i class="fa fa-angle-down"></i>
+									</a>
+								</div>
+								<div id="collapseOne" class="panel-collapse collapse" style="">
+									<div class="panel-body text-sm">
+										<p>
+											<b>+Cấu hình đặt cọc:</b> Là cấu hình cọc đơn hàng của user
+											khi user đặt hàng để đảm bảo trách nhiệm của user với món
+											hàng của mình
+										</p>
+										<p>&nbsp&nbspVí dụ: Khoảng giá từ 0-20tr: Cọc 70% giá trị
+											đơn hàng, 20-100tr, cọc 50% giá trị đơn hàng...</p>
+										<p>Admin có thể cấu hình loại trừ cho user:</p>
+										<p>Ví dụ: user <b>user@email.com</b> đặt cọc 30% giá trị đơn hàng</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+	</section>
+
+	<div class="modal fade" id="modal-form">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-sm-12 b-r">
+							<h3 class="m-t-none m-b">Tỷ giá đặt cọc đơn hàng</h3>
+							<form id="depositForm" data-method="POST"
+								data-action="/admin/deposit" role="form">
+								<input type="hidden" name="csrf_token"
+									value="{{ csrf_token() }}"> <input class="data-hidden"
+									name="id" id="id" type="hidden">
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-6">
+										<label>Đơn hàng từ</label> <input id="from_price"
+											name="from_price" type="text"
+											class="form-control parsley-validated"
+											placeholder="Eg: 50000000" data-required="true">
+									</div>
+									<div class="col-sm-6">
+										<label>Đơn hàng đến</label> <input id="to_price" type="text"
+											name="to_price" class="form-control parsley-validated"
+											placeholder="Eg: 100000000" data-required="true">
+									</div>
+								</div>
+								<div class="form-group">
+									<label>Tỷ giá đặt cọc</label> <input type="text"
+										id="deposit_value" class="form-control" name="deposit_value"
+										placeholder="Eg: 70 (% giá trị đơn hàng)">
+								</div>
+								<div class="form-group">
+									<label>Loại trừ</label> <input type="text" id="customer"
+										class="form-control" name="customer"
+										placeholder="Eg:customer@email.com">
+								</div>
+								<div class="checkbox m-t-lg">
+									<button
+										onclick="business_function.submitDepositForm('depositForm');"
+										type="button"
+										class="btn btn-sm btn-success pull-right text-uc m-t-n-xs">
+										<strong>Submit</strong>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<script type="text/javascript">
+		var arrayLoaded = [];
+
+		$(function() {
+			$('#example_dtb')
+					.DataTable(
+							{
+								"bProcessing" : true,
+								"sDom" : "<'row'<'col-sm-6'l><'col-sm-6'f>r>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+								"sPaginationType" : "full_numbers",
+								ajax : {
+									url : '/admin/list_deposit',
+									type : "POST",
+									data : function(d) {
+										return $.extend({}, d, {
+											"csrf_token" : '{{ csrf_token() }}'
+										});
+									},
+									"dataSrc" : function(json) {
+										//arrayLoaded = json.data;
+										arrayLoaded = json.data;
+										return json.data;
+									}
+								},
+								columns : [
+										{
+											"data" : "from",
+											render : function(data, type, row) {
+												return formatMoney(row.from_price);
+											}
+										},
+										{
+											"data" : "to",
+											render : function(data, type, row) {
+												return formatMoney(row.to_price);
+											}
+										},
+										{
+											"data" : "rate",
+											render : function(data, type, row) {
+												return row.deposit_value
+											}
+										},
+										{
+											"data" : "customer"
+										},
+										{
+											"data" : "",
+											render : function(data, type, row) {
+												var html = '<a class="btn btn-default btn-xs active" onclick="EditRecord('
+														+ row.id
+														+ ')" href="javascript:;"><i class="fa fa-edit"></i></a>';
+												html += '<a class="btn btn-default btn-xs m-l-5" href="/admin/fee-config?type="><i class="fa fa-times"></i></a>';
+												return html;
+											}
+										} ],
+								"fnDrawCallback" : function(oSettings) {
+
+								}
+							});
+		});
+		function EditRecord(id) {
+			var editObject = arrayLoaded.find(function(el) {
+				return el.id === id;
+			});
+			if (!editObject)
+				return;
+
+			for ( var key in editObject) {
+				$('#modal-form #' + key).val(editObject[key]);
+			}
+			$('#modal-form').modal('show');
+		}
+	</script>
+	{% endblock %}
+</body>
+</html>

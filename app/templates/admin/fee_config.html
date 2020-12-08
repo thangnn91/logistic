@@ -1,0 +1,236 @@
+ {% extends "./layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					quản trị</a></li>
+			<li><a href="#">Cấu hình phí</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="row">
+				<div
+					class="col-xs-12 col-sm-10 col-md-10 col-sm-offset-1 col-md-offset-1">
+					<section class="panel panel-default">
+						<header class="panel-heading font-bold">Cấu hình phí</header>
+						<div class="panel-body">
+							<div id="fee_config_form" data-method="POST" data-action="empty">
+								<div class="form-group">
+									<ul class="nav nav-tabs">
+										<li class="active"><a href="#prices" data-toggle="tab">Phí
+												dịch vụ</a></li>
+										<li><a href="#features" data-toggle="tab">Phí vận
+												chuyển quốc tế</a></li>
+									</ul>
+								</div>
+								<div class="tab-content">
+									<div class="tab-pane active" id="prices">
+										<div class="panel-body">
+											<form data-method="POST" data-action="/admin/fee-config"
+												id="service_fee_form" class="form-horizontal">
+												<input type="hidden" name="csrf_token"
+													value="{{ csrf_token() }}">
+												<div class="fee_body">
+													{% if list_data is defined and type == '1' %} {% set
+													count=namespace(value=0) %} {% for item in list_data %}
+													<div class="form-group fee_item fee_item_added">
+														<label class="col-sm-2 control-label p-t-5">Khoảng
+															giá</label>
+														<div class="col-sm-10">
+															<div class="row">
+																<div class="col-md-4">
+																	<input type="number" value="{{item.from_value}}"
+																		class="form-control" placeholder="Từ (triệu vnđ)">
+																</div>
+																<div class="col-md-4">
+																	<input type="number" value="{{item.to_value}}"
+																		class="form-control" placeholder="Đến (triệu vnđ)">
+																</div>
+																<div class="col-md-2">
+																	<input type="number" value="{{item.fee}}"
+																		class="form-control" placeholder="Phí dịch vụ (%)">
+																</div>
+																{% if count.value == 0 %}
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 add_fee" data-type="1"><i
+																			class="fa fa-plus-square icon"></i></a></label>
+																</div>
+																{% else %}
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 rm_fee"><i
+																			class="fa fa-trash-o icon"></i></a></label>
+																</div>
+																{% endif %} {% set count.value = count.value + 1 %}
+															</div>
+														</div>
+													</div>
+													{% endfor %} {% else %}
+													<div class="form-group fee_item">
+														<label class="col-sm-2 control-label p-t-5">Khoảng
+															giá</label>
+														<div class="col-sm-10">
+															<div class="row">
+																<div class="col-md-4">
+																	<input type="number" class="form-control"
+																		placeholder="Từ (triệu vnđ)">
+																</div>
+																<div class="col-md-4">
+																	<input type="number" class="form-control"
+																		placeholder="Đến (triệu vnđ)">
+																</div>
+																<div class="col-md-2">
+																	<input type="number" class="form-control"
+																		placeholder="Phí dịch vụ (%)">
+																</div>
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 add_fee" data-type="1"><i
+																			class="fa fa-plus-square icon"></i></a></label>
+																</div>
+															</div>
+														</div>
+													</div>
+													{% endif %}
+												</div>
+												<div class="line line-dashed line-lg pull-in"></div>
+												<div class="form-group">
+													<button
+														onclick="business_function.submitFeeForm('service_fee_form', 1);"
+														type="button" class="btn btn-sm btn-default">Cập
+														nhật</button>
+												</div>
+											</form>
+										</div>
+									</div>
+									<div class="tab-pane" id="features">
+										<div class="panel-body">
+											<form id="transport_fee_form" data-method="POST"
+												data-action="/admin/fee-config" class="form-horizontal">
+												<input type="hidden" name="csrf_token"
+													value="{{ csrf_token() }}">
+												<div class="fee_body">
+													{% if list_data is defined and type == '2' %} {% set
+													count=namespace(value=0) %} {% for item in list_data %}
+													<div class="form-group fee_item fee_item_added">
+														<label class="col-sm-2 control-label p-t-5">Cân
+															nặng</label>
+														<div class="col-sm-10">
+															<div class="row">
+																<div class="col-md-4">
+																	<input type="number" value="{{item.from_value}}"
+																		class="form-control" placeholder="Từ (kg)">
+																</div>
+																<div class="col-md-4">
+																	<input type="number" value="{{item.to_value}}"
+																		class="form-control" placeholder="Đến (kg)">
+																</div>
+																<div class="col-md-2">
+																	<input type="number" value="{{item.fee}}"
+																		class="form-control" placeholder="Phí dịch vụ (vnđ)">
+																</div>
+																{% if count.value == 0 %}
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 add_fee" data-type="2"><i
+																			class="fa fa-plus-square icon"></i></a></label>
+																</div>
+																{% else %}
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 rm_fee"><i
+																			class="fa fa-trash-o icon"></i></a></label>
+																</div>
+																{% endif %} {% set count.value = count.value + 1 %}
+															</div>
+														</div>
+													</div>
+													{% endfor %} {% else %}
+													<div class="form-group fee_item">
+														<label class="col-sm-2 control-label p-t-5">Cân
+															nặng</label>
+														<div class="col-sm-10">
+															<div class="row">
+																<div class="col-md-4">
+																	<input type="number" class="form-control"
+																		placeholder="Từ (kg)">
+																</div>
+																<div class="col-md-4">
+																	<input type="number" class="form-control"
+																		placeholder="Đến (kg)">
+																</div>
+																<div class="col-md-2">
+																	<input type="number" class="form-control"
+																		placeholder="Phí dịch vụ (vnđ)">
+																</div>
+																<div class="col-md-2">
+																	<label class="col-sm-2 control-label p-t-5"><a
+																		href="#" class="p-t-5 add_fee" data-type="2"><i
+																			class="fa fa-plus-square icon"></i></a></label>
+																</div>
+															</div>
+														</div>
+													</div>
+													{% endif %}
+												</div>
+												<div class="line line-dashed line-lg pull-in"></div>
+												<div class="form-group">
+													<button
+														onclick="business_function.submitFeeForm('transport_fee_form', 2);"
+														type="button" class="btn btn-sm btn-default">Cập
+														nhật</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="panel-group m-b" id="accordion2">
+								<div class="panel panel-default">
+									<div class="panel-heading">
+										<a class="accordion-toggle" data-toggle="collapse"
+											data-parent="#accordion2" href="#collapseOne"> Hướng dẫn
+											cấu hình phí &nbsp<i class="fa fa-angle-down"></i>
+										</a>
+									</div>
+									<div id="collapseOne" class="panel-collapse collapse" style="">
+										<div class="panel-body text-sm">
+											<p>
+												<b>+Phí dịch vụ:</b> Là phí mua hàng từ website nước ngoài,
+												thường tính theo giá trị đơn hàng (1,2,3,4,5% giá trị đơn
+												hàng)
+
+											</p>
+											<p>&nbsp&nbspVí dụ: Khoảng giá từ 0-50tr: phí dịch vụ 5%,
+												50-100tr, phí dịch vụ 4%...</p>
+											<p>
+												<b>+Phí vận chuyển quốc tế:</b> Là phí vận chuyển từ kho
+												quốc tế về kho VN, thường tính theo giá trị đơn hàng
+												(25k/1kg, 20k/1kg...)
+											</p>
+											<p>&nbsp&nbspVí dụ: Khoảng giá từ 0-50tr: phí mua hàng 25k/1kg,
+												50-100tr, phí mua hàng 20k/kg...</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+<script type="text/javascript">
+	var feeType = "{{type}}";
+	if (feeType) {
+		$('.nav-tabs li a').prop('disabled', true);
+	}
+	if (feeType === "2") {
+		$('input[name=optradio]').prop('checked', false);
+		$('#transport_fee').prop('checked', true);
+		$('.nav-tabs a[href="#features"]').tab('show');
+	}
+</script>
+{% endblock %}

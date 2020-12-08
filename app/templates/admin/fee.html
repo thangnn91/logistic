@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+	{% extends "./layout.html" %} {% block content %}
+	<section class="vbox">
+		<section class="scrollable padder">
+			<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+				<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+						quản trị</a></li>
+				<li><a href="#">Cấu hình phí</a></li>
+			</ul>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12">
+						<section class="panel panel-default">
+							<div class="panel-heading">
+								<span class="btn-group pull-right"><a
+									href="/admin/fee-config" class="btn btn-info btn-sm">Thêm
+										mới phí</a> </span>
+								<h5 class="font-bold">Cấu hình phí</h5>
+							</div>
+							<div class="panel-body">
+								<div class="table-responsive">
+									<table id="example_dtb"
+										class="table table-striped m-b-none dataTable no-footer"
+										style="width: 100%">
+										<thead>
+											<tr>
+												<th>Loại phí</th>
+												<th>Khoảng giá đầu</th>
+												<th>Khoảng giá cuối</th>
+												<th>Phí</th>
+												<th>Thao tác</th>
+											</tr>
+										</thead>
+										<tbody>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+		</section>
+	</section>
+	<script type="text/javascript">
+		$(document)
+				.ready(
+						function() {
+							$('#example_dtb')
+									.DataTable(
+											{
+												"bProcessing" : true,
+												"sDom" : "<'row'<'col-sm-6'l><'col-sm-6'f>r>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+												"sPaginationType" : "full_numbers",
+												ajax : {
+													url : '/admin/list_fee',
+													type : "POST",
+													"data" : function(d) {
+														return $
+																.extend(
+																		{},
+																		d,
+																		{
+																			"csrf_token" : '{{ csrf_token() }}'
+																		});
+													}
+												},
+												columns : [
+														{
+															"data" : "type",
+															render : function(
+																	data, type,
+																	row) {
+																if (row.type == 1)
+																	return 'Phí dịch vụ';
+																else
+																	return 'Phí vận chuyển';
+															}
+														},
+														{
+															"data" : "from_price",
+															render : function(
+																	data, type,
+																	row) {
+																if (row.type === 1)
+																	return row.from_value
+																			+ ' triệu <sup>đ</sup>';
+																else
+																	return row.from_value
+																			+ '<sup>kg</sup>';
+															}
+														},
+														{
+															"data" : "to_price",
+															render : function(
+																	data, type,
+																	row) {
+																if (row.type === 1)
+																	return row.to_value
+																			+ ' triệu <sup>đ</sup>';
+																else
+																	return row.to_value
+																			+ '<sup>kg</sup>';
+															}
+														},
+														{
+															"data" : "fee",
+															render : function(
+																	data, type,
+																	row) {
+																if (row.type === 1)
+																	return (row.fee + '<i>%</i>');
+																else
+																	return (row.fee + '<i>đ</i>');
+															}
+														},
+														{
+															"data" : "",
+															render : function(
+																	data, type,
+																	row) {
+																var html = '<b style="display:none">'
+																		+ row.type
+																		+ '</b><a class="btn btn-default btn-xs active" href="/admin/fee-config?type='
+																		+ row.type
+																		+ '"><i class="fa fa-edit"></i></a>';
+																html += '<b style="display:none">'
+																		+ row.type
+																		+ '</b><a class="btn btn-default btn-xs m-l-5" href="/admin/fee-config?type='
+																		+ row.type
+																		+ '"><i class="fa fa-times"></i></a>';
+																return html;
+															}
+														} ],
+												"fnDrawCallback" : function(
+														oSettings) {
+													rowspanDTable(oSettings,
+															"example_dtb", 1);
+												}
+											});
+						});
+	</script>
+	{% endblock %}
+</body>
+</html>

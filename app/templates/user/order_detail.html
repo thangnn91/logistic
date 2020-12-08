@@ -1,0 +1,180 @@
+{% extends "./user_layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					chủ</a></li>
+			<li><a href="#">Thông tin đơn hàng</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default wizard">
+						<header class="panel-heading font-bold">Chi tiết đơn hàng</header>
+						<div class="panel-body">
+							<div class="wizard-steps clearfix" id="form-wizard">
+								<ul class="steps">
+									<li data-target="#step1" data-index="1" class="active"><span
+										class="badge badge-info">1</span>Khởi tạo</li>
+									<li data-target="#step2" data-index="2"><span
+										class="badge">2</span>Đã đặt cọc</li>
+									<li data-target="#step4" data-index="3"><span
+										class="badge">3</span>Đã đặt hàng</li>
+									<li data-target="#step3" data-index="4"><span
+										class="badge">4</span>Hàng về kho nước ngoài</li>
+									<li data-target="#step3" data-index="5"><span
+										class="badge">5</span>Đang ship về VN</li>
+									<li data-target="#step3" data-index="6"><span
+										class="badge">6</span>Đã tới kho VN</li>
+									<li data-target="#step3" data-index="7"><span
+										class="badge">7</span>Đang giao nội địa</li>
+									<li data-target="#step3" data-index="8"><span
+										class="badge">8</span>Khách đã nhận</li>
+								</ul>
+							</div>
+							<div id="list_order_form">
+								<input type="hidden" name="csrf_token"
+									value="{{ csrf_token() }}"> {% for item in detail %}
+								<div class="order_item" data-price="{{item.p_vnd_price}}">
+									<div class="row m-t-sm">
+										<div class="col-md-8">
+											<table style="word-break: break-word;"
+												class="table table-striped m-b-none">
+												<tbody>
+													<tr>
+														<td width=20%>Tên sản phẩm</td>
+														<td><b>{{item.p_name}}</b></td>
+													</tr>
+													<tr>
+														<td>Link sản phẩm</td>
+														<td><a target="_blank" href="{{item.p_link}}"><b>{{item.p_link}}</b></a></td>
+													</tr>
+													<tr>
+														<td>Màu sắc</td>
+														<td><b>{{item.p_color}}</b></td>
+													</tr>
+													<tr>
+														<td>Kích cỡ</td>
+														<td><b>{{item.p_size}}</b></td>
+													</tr>
+													<tr>
+														<td>Số lượng</td>
+														<td><b>{{item.p_quantity}}</b></td>
+													</tr>
+													<tr>
+														<td>Giá sp</td>
+														<td><b>{{item.p_price}}</b> {% if item.p_currency ==
+															1 %} <b>¥</b> {% elif item.p_currency == 2 %} <b>USD</b>
+															{%endif %}</td>
+													</tr>
+													<tr>
+														<td>Giá vnđ</td>
+														<td><b>{{"{:,.2f}đ".format(item.p_vnd_price)}}</b></td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="col-md-4">
+											{% if item.p_image.startswith('http')%} <a
+												href="javascript:;" style="width: 225px;"
+												class="thumb pull-right m-l"> <img
+												src="{{item.p_image}}">
+											</a> {%else%} <a href="javascript:;" style="width: 225px;"
+												class="thumb pull-right m-l"> <img
+												src="/static/upload/image/{{item.p_image}}"></a>{%endif %}
+										</div>
+									</div>
+									<div class="line line-dashed line-lg pull-in"></div>
+								</div>
+								{% endfor %}
+								<div class="form-group">
+									<label class="col-sm-2 control-label">Tổng đơn hàng(tạm
+										tính)</label>
+									<div class="col-sm-10">
+										<p>
+											Phí dịch vụ (1): <b class="service_fee"></b><sup>đ</sup>
+										</p>
+										<p>
+											Phí vận chuyển quốc tế (2): <b class="national_ship_fee"
+												data-weight="{{order.total_weight or ''}}">0</b><sup>đ</sup>
+										</p>
+										<p>
+											Phí vận chuyển nội địa (3): <b class="domestic_ship_fee">0</b><sup>đ</sup>
+										</p>
+										<p>
+											Tổng phí tạm tính (1+2+3): <b class="total_amount"></b><sup>đ</sup>
+										</p>
+										<p>
+											KH đã cọc: <b class="user_deposit">{{"{:,.2f}đ".format(order.user_deposit)}}</b>
+										</p>
+									</div>
+
+								</div>
+								{% if order.user_deposit == 0 %}
+								<div class="form-group">
+									<label class="col-sm-2 control-label"></label>
+									<div class="col-sm-10">
+										<div class="m-t-sm">
+											<button id="bt_deposit_order" disabled="disabled" onclick="business_function.userDeposit();"
+												class="btn btn-success">
+												<i class="fa fa-shopping-cart"></i>&nbspĐặt cọc
+											</button>
+										</div>
+									</div>
+								</div>
+								{% endif %}
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+
+<script type="text/javascript">
+	var total_price_wjlis = 0;
+	var orderStatus_wjlis = '{{order.status}}';
+	var list_fee_wjlis = "{{ list_fee }}";
+	var elem = document.createElement('textarea');
+	elem.innerHTML = list_fee_wjlis;
+	var arrayFee = JSON.parse(elem.value);
+	$(function() {
+		$('#form-wizard ul li').each(function() {
+			let index = $(this).data('index');
+			if (index <= parseInt(orderStatus_wjlis) + 1) {
+				$(this).addClass('active');
+				$(this).children('span').addClass('badge-info');
+			}
+		});
+		
+		$('#list_order_form .order_item').each(function(){
+			var price_wjlis = $(this).data('price');
+			total_price_wjlis += parseInt(price_wjlis);
+		});
+		
+		var feeServiceObject = arrayFee.find(function(el) {
+			return (el.type === 1 && el.from_value * 1000000 < total_price_wjlis && el.to_value * 1000000 > total_price_wjlis);
+		});
+		
+		if(feeServiceObject){
+			total_price_wjlis = ~~(total_price_wjlis + total_price_wjlis * (feeServiceObject.fee / 100));
+			$('#list_order_form .service_fee').text(formatMoney(~~(total_price_wjlis * (feeServiceObject.fee / 100))));
+		}				
+		
+		var weight_wjlis = $('#list_order_form .national_ship_fee').data('weight');
+		if(weight_wjlis){
+			var feeNationalShipObject = arrayFee.find(function(el) {				
+				return (el.type === 2 && el.from_value <= weight_wjlis && el.to_value > weight_wjlis);
+			});
+			
+			if(feeNationalShipObject){
+				total_price_wjlis += feeNationalShipObject.fee;
+				$('#list_order_form .national_ship_fee').text(formatMoney(feeNationalShipObject.fee));
+			}	
+		}
+		$('#list_order_form .total_amount').text(formatMoney(total_price_wjlis));
+		$('#bt_deposit_order').prop('disabled', false);
+	});
+</script>
+{% endblock %}

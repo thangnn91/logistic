@@ -1,0 +1,150 @@
+{% extends "./layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i>Home</a></li>
+			<li><a href="#">Danh sách tài khoản</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default">
+						<div class="panel-heading">
+							<span class="btn-group pull-right"><a href="/admin/create-user"
+								class="btn btn-default btn-sm">Thêm mới</a>
+							</span>
+							<h5 class="font-bold">Danh sách tài
+							khoản</h5>
+						</div>
+						<div class="panel-body">
+
+							<div class="form-inline form-horizontal" role="form">
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-4">
+										<label>Email</label><input id="search_email"
+											class="form-control col-md-5" type="text">
+									</div>
+									<div class="col-sm-3">
+										<label>Loại tài khoản</label><select id="account_type"
+											name="account" class="form-control m-b">
+											<option value="">Tất cả</option>
+											<option value="0">User</option>
+											<option value="2">Mod</option>
+											<option value="3">Assistance</option>
+											<option value="4">Buyer</option>
+											<option value="5">Shipper</option>
+										</select>
+									</div>
+									<div class="col-sm-2">
+										<a type="button" style="margin-top: 22px;"
+											class="btn btn-default" onclick="InitDatatable(1);">Tìm
+											kiếm</a>
+									</div>
+								</div>
+
+
+							</div>
+
+							<div class="table-responsive m-t-sm">
+								<table id="example_dtb" class="table table-striped b-t b-light"
+									style="width: 100%">
+									<thead>
+										<tr>
+											<th>Email</th>
+											<th>Họ tên</th>
+											<th>Địa chỉ</th>
+											<th>Số điện thoại</th>
+											<th>Trạng thái</th>
+											<th>Loại tài khoản</th>
+											<th>Thao tác</th>
+										</tr>
+									</thead>
+									<tbody id="data-container">
+										<tr>
+											<td>Đang lấy dữ liệu!!!!!!</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+							<div id="pagination-container"></div>
+						</div>
+
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+<script type="text/template" id="table-body">
+    <% for (var i = 0, len = data.length; i < len; i++) { %>
+		<tr>
+			<td><%= data[i].email %></td>
+			<td><%= data[i].fullname %></td>
+			<td><%= data[i].address %></td>
+			<td><%= data[i].mobile %></td>
+			<td><%= data[i].status == 1 ? 'Hoạt động' : 'Không hoạt động' %></td>
+			<td><%= data[i].type == 1 ? 'Admin' : data[i].type == 2 ? 'Mod' :  data[i].type == 3 ? 'CSKH' : data[i].type == 4 ? 'NV mua hàng' : data[i].type == 5 ? 'Shipper' : 'User' %></td>
+			<td>
+				<% if (data[i].type != 1) { %>
+					<a title="Cập nhật" class="btn btn-default btn-xs active" href="/admin/edit-user?id=<%= data[i].id %>"><i class="fa fa-edit"></i></a>
+				<% if (data[i].status == 1) { %>
+					<a title="Khóa tài khoản" onclick="LockUnlock(1, <%= data[i].id %>, '<%= data[i].email %>');" class="btn btn-default btn-xs m-l-5" href="javascript:;"><i class="fa fa-lock"></i></a>
+				<% } else { %>
+					<a title="Mở khóa tài khoản" onclick="LockUnlock(2, <%= data[i].id %>, '<%= data[i].email %>');" class="btn btn-default btn-xs m-l-5" href="javascript:;"><i class="fa fa-unlock"></i></a>
+				<% } %>
+				<% } %>
+			</td>
+	</tr>
+    <% } %>
+</script>
+<script type="text/javascript">
+	var csrf_token_btivy = "{{ csrf_token() }}";
+	$(function() {
+		InitDatatable(1);
+	});
+
+	function InitDatatable(page) {
+		$.ajax({
+			type : 'POST',
+			data : {
+				"page" : page,
+				"type" : $('#account_type').val(),
+				"email" : $('#search_email').val(),
+				"csrf_token" : csrf_token_btivy
+			},
+			url : '/admin/list-user',
+			success : function(response) {
+				var template = _.template($('#table-body').html())({
+					data : response.data
+				});
+				$('#data-container').html(template);
+				$("#pagination-container").pagination({
+					items : response.total,
+					itemsOnPage : response.limit,
+					cssStyle : 'light-theme',
+					currentPage : page,
+					onPageClick : function(pageNum) {
+						InitDatatable(pageNum)
+					}
+				});
+			}
+		});
+	}
+
+	function LockUnlock(type, id, name) {
+		$.confirm({
+			title : 'Xác nhận',
+			content : 'Bạn chắc chắn muốn ' + (type == 1 ? "khóa" : "mở khóa")
+					+ ' tài khoản: ' + name,
+			buttons : {
+				confirm : function() {
+					$.alert('Confirmed!');
+				},
+				cancel : function() {
+					//Do nothing
+				}
+			}
+		});
+	}
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "./user_layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					chủ</a></li>
+			<li><a href="#">Đổi mật khẩu</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="row">
+				<div
+					class="col-xs-12 col-sm-10 col-md-10 col-sm-offset-1 col-md-offset-1">
+					<section class="panel panel-default">
+						<header class="panel-heading font-bold">Đổi mật khẩu</header>
+						<div class="panel-body">
+							<div id="change_pass_form" data-method="POST"
+								data-action="/dashboard/change-pass">
+								{{ form.csrf_token }}
+								<div class="form-group">
+									<label>Mật khẩu cũ</label><input type="password"
+										class="form-control require" name="old_pass"
+										data-require="Vui lòng nhập mật khẩu cũ" value="">
+								</div>
+								<div class="form-group">
+									<label>Mật khẩu mới</label><input name="new_pass"
+										type="password" class="form-control require checkdup"
+										data-require="Vui lòng nhập mật khẩu mới" value="">
+								</div>
+								<div class="form-group">
+									<label>Nhập lại mật khẩu</label><input name="renew_pass"
+										type="password" class="form-control require checkdup"
+										data-checkdup="Mật khẩu nhập lại không đúng"
+										data-require="Vui lòng nhập lại mật khẩu" value="">
+								</div>
+								<button
+									onclick="business_function.changePassword('change_pass_form');"
+									type="button" class="btn btn-sm btn-default">Cập nhật</button>
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+{% endblock %}

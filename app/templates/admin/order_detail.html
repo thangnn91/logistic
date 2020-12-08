@@ -1,0 +1,300 @@
+{% extends "./layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					chủ</a></li>
+			<li><a href="#">Thông tin đơn hàng</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default wizard">
+						<header class="panel-heading font-bold">Chi tiết đơn hàng</header>
+						<div class="panel-body">
+							<div id="list_order_form">
+								<input type="hidden" name="csrf_token"
+									value="{{ csrf_token() }}"> {% for item in detail %}
+								<div class="order_item" data-price="{{item.p_vnd_price}}">
+									<div class="row m-t-sm">
+										<div class="col-md-8">
+											<table style="word-break: break-word;"
+												class="table table-striped m-b-none">
+												<tbody>
+													<tr>
+														<td width=20%>Tên sản phẩm</td>
+														<td><div>
+																<b>{{item.p_name}}</b>
+															</div> <input name="p_name" class="form-control hidden"
+															value="{{item.p_name}}"></td>
+													</tr>
+													<tr>
+														<td>Link sản phẩm</td>
+														<td><div>
+																<b><a target="_blank" href="{{item.p_link}}">{{item.p_link}}</a></b>
+															</div> <input name="p_link" class="form-control hidden"
+															value="{{item.p_link}}"></td>
+													</tr>
+													<tr>
+														<td>Màu sắc</td>
+														<td><div>
+																<b>{{item.p_color}}</b>
+															</div> <input name="p_color" class="form-control hidden"
+															value="{{item.p_color}}"></td>
+													</tr>
+													<tr>
+														<td>Kích cỡ</td>
+														<td><div>
+																<b>{{item.p_size}}</b>
+															</div> <input name="p_size" class="form-control hidden"
+															value="{{item.p_size}}"></td>
+													</tr>
+													<tr>
+														<td>Số lượng</td>
+														<td><div>
+																<b>{{item.p_quantity}}</b>
+															</div> <input
+															onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/\D/g, '');"
+															name="p_quantity" class="form-control hidden"
+															value="{{item.p_quantity}}"></td>
+													</tr>
+													<tr>
+														<td>Giá sp</td>
+														<td><div>
+																<b>{{item.p_price}}</b> {% if item.p_currency == 1 %} <b>¥</b>
+																{% elif item.p_currency == 2 %} <b>USD</b> {%endif %}
+															</div> <input
+															onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/[^0-9.]+/g, '');"
+															name="p_price" class="form-control hidden"
+															value="{{item.p_price}}"><input name="p_currency"
+															type="hidden" value="{{item.p_currency}}"> <input
+															name="id" type="hidden" value="{{item.id}}"></td>
+													</tr>
+													<tr>
+														<td>Giá vnđ</td>
+														<td><b>{{"{:,.2f}đ".format(item.p_vnd_price)}}</b></td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+										<div class="col-md-4">
+											{% if item.p_image.startswith('http')%} <a
+												href="javascript:;" style="width: 225px;"
+												class="thumb pull-right m-l"> <img
+												src="{{item.p_image}}">
+											</a> {%else%} <a href="javascript:;" style="width: 225px;"
+												class="thumb pull-right m-l"> <img
+												src="/static/upload/image/{{item.p_image}}"></a>{%endif %}
+										</div>
+										<div class="col-lg-10 order_detail_section">
+											<div class="m-t-sm">
+												<button onclick="EditItem(this);" class="btn btn-info">
+													<i class="fa fa-edit"></i>&nbspEdit
+												</button>
+												<button
+													onclick="business_function.confirmEditOrderDetail(this, {{item.id}});"
+													class="btn btn-success">
+													<i class="fa fa-check"></i>&nbspConfirm
+												</button>
+											</div>
+										</div>
+									</div>
+
+									<div class="line line-dashed line-lg pull-in"></div>
+								</div>
+								{% endfor %}
+								<div class="order_footer">
+									<div class="form-group">
+										<label class="col-sm-2 control-label">Thông tin đơn
+											hàng</label>
+										<div class="col-sm-10">
+											<div class="order_elm">
+												<label>Trạng thái:</label> <span> <b
+													class="order_status"></b>
+												</span> <select id="order_type" class="form-control m-b hidden">
+
+												</select>
+
+											</div>
+											<div class="order_elm">
+												<label>KH cọc:</label> <span> <b class="user_deposit">{{"{:,.2f}đ".format(order.user_deposit)}}</b><sup>đ</sup>
+												</span> <input id='user_deposit' class="form-control hidden"
+													value="{{order.user_deposit}}" />
+											</div>
+											<div class="order_elm">
+												<label>Tổng trọng lượng:</label> <span> <b
+													class="total_weight">{{order.total_weight or '0'}}</b><sup>kg</sup>
+												</span> <input id="total_weight"
+													onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/[^0-9.]+/g, '');"
+													class="form-control hidden"
+													value="{{order.total_weight or '0'}}" />
+											</div>
+											<div class="order_elm">
+												<label>Tổng giá đơn hàng:</label> <span> <b
+													class="total_price">{{"{:,.2f}đ".format(order.final_price)}}</b><sup>đ</sup>
+												</span>
+												<div class="div_total_price input-group hidden">
+													<input id="final_price" type="text" class="form-control"
+														onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/[^0-9.]+/g, '');"
+														value="{{order.final_price}}">
+													<div class="input-group-btn">
+														<button class="btn btn-default"
+															data-tempprice="{{order.price_vnd}}"
+															onclick="CanculatePrice(this);" type="button">
+															<i class="fa fa-search"></i>&nbspTính toán giá
+														</button>
+													</div>
+												</div>
+
+											</div>
+
+											<div>
+												<label>CT tính tổng giá: </label><b><i
+													class="formular_desc">Giá web * tỷ giá + phí dịch vụ
+														(3-5%) + phí ship quốc tế (tính theo trọng lượng)</i></b>
+											</div>
+
+
+										</div>
+									</div>
+									<div class="col-lg-10">
+										<div class="m-t-sm">
+											<button onclick="EditOrder(this);" class="btn btn-info">
+												<i class="fa fa-edit"></i>&nbspEdit
+											</button>
+											<button
+												onclick="business_function.confirmEditOrder(this, {{order.id}});"
+												class="btn btn-success">
+												<i class="fa fa-check"></i>&nbspConfirm
+											</button>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+<script type="text/javascript">
+	var orderStatus_wjlis = '{{order.status}}';
+	var list_fee_wjlis = "{{ list_fee }}";
+	var elem = document.createElement('textarea');
+	elem.innerHTML = list_fee_wjlis;
+	var arrayFee = JSON.parse(elem.value);
+	$(function() {
+		var account_type_lkref = $('#30315ecf55f17103458c08365556d661').val();
+		if(account_type_lkref === 'BUYER' || account_type_lkref === 'SHIPPER')
+			$('.order_detail_section').remove();
+			
+		$('.order_footer .order_status').text(business_function.getOrderStatusText(parseInt(orderStatus_wjlis)));
+	});
+
+	function EditItem(t) {
+		$(t).parents('.order_item').find('tbody tr td div').hide();
+		$(t).parents('.order_item').find('tbody tr td input').removeClass(
+				'hidden');
+		
+		$(t).html('<i class="fa fa-times"></i>&nbspCancel');
+		$(t).attr("onclick","CancelEditItem(this);");
+		$(t).addClass('btn-danger').removeClass('btn-info');
+	}
+	
+	function CancelEditItem(t){
+		$(t).parents('.order_item').find('tbody tr td div').show();
+		$(t).parents('.order_item').find('tbody tr td input').addClass(
+		'hidden');
+		$(t).html('<i class="fa fa-edit"></i>&nbspEdit');
+		$(t).attr("onclick","EditItem(this);");
+		$(t).removeClass('btn-danger').addClass('btn-info');
+	}
+	
+	function EditOrder(t) {
+		$(t).parents('.order_footer').find('.order_elm span').hide();
+		$(t).parents('.order_footer').find('.order_elm input, .order_elm select, .order_elm .div_total_price').removeClass(
+				'hidden');
+		
+		$(t).html('<i class="fa fa-times"></i>&nbspCancel');
+		$(t).attr("onclick","CancelEditOrder(this);");
+		$(t).addClass('btn-danger').removeClass('btn-info');
+		
+		var drdStatus = `<option value="0">Khởi tạo</option>
+			<option value="1">Đã cọc</option>
+			<option value="2">Đã đặt hàng</option>
+			<option value="3">Hàng về kho quốc tế</option>
+			<option value="4">Đang ship về VN</option>
+			<option value="5">Đã tới kho VN</option>
+			<option value="6">Đang giao nội địa</option>
+			<option value="7">Hoàn thành</option>
+			<option value="8">Nghi vấn</option>
+			<option value="9">Hủy</option>`;
+		
+		var account_type_lkref = $('#30315ecf55f17103458c08365556d661').val();
+		if(account_type_lkref === 'BUYER'){
+			drdStatus = `<option value="2">Đã đặt hàng</option>
+				<option value="3">Hàng về kho quốc tế</option>
+				<option value="4">Đang ship về VN</option>`;
+			$(t).parents('.order_footer').find('.order_elm input, .order_elm .div_total_price').addClass(
+			'hidden');
+			$(t).parents('.order_footer').find('.order_elm span:not(:first)').show();
+		}
+			
+		else if(account_type_lkref === 'SHIPPER'){
+			drdStatus = `<option value="6">Đang giao nội địa</option>
+				<option value="7">Hoàn thành</option>`;
+			$(t).parents('.order_footer').find('.order_elm input, .order_elm .div_total_price').addClass(
+			'hidden');
+			$(t).parents('.order_footer').find('.order_elm span:not(:first)').show();
+		}						
+		$('#order_type').html(drdStatus);
+		$('#order_type').val(orderStatus_wjlis);
+	}
+	
+	
+	function CancelEditOrder(t){
+		$(t).parents('.order_footer').find('.order_elm span').show();
+		$(t).parents('.order_footer').find('.order_elm input, .order_elm select, .order_elm .div_total_price').addClass(
+		'hidden');
+		$(t).html('<i class="fa fa-edit"></i>&nbspEdit');
+		$(t).attr("onclick","EditOrder(this);");
+		$(t).removeClass('btn-danger').addClass('btn-info');
+	}
+	
+	function CanculatePrice(t){
+		var total_price_qadfe = parseInt($(t).data('tempprice'));
+		var total_price_format = formatMoney(total_price_qadfe) + 'đ';
+		var formularDesc = total_price_format;
+		var feeServiceObject = arrayFee.find(function(el) {
+			return (el.type === 1 && el.from_value * 1000000 < total_price_qadfe && el.to_value * 1000000 > total_price_qadfe);
+		});
+		
+		if(feeServiceObject){
+			total_price_qadfe = ~~(total_price_qadfe + total_price_qadfe * (feeServiceObject.fee / 100));
+			formularDesc += ' + ' + total_price_format + ' * ' + feeServiceObject.fee + '%';
+		}
+		
+		var weight_wjlis = $('input#total_weight').val();
+		if(weight_wjlis && weight_wjlis > 0){
+			var feeNationalShipObject = arrayFee.find(function(el) {				
+				return (el.type === 2 && el.from_value <= weight_wjlis && el.to_value > weight_wjlis);
+			});		
+			if(feeNationalShipObject){
+				total_price_qadfe += ~~(feeNationalShipObject.fee * weight_wjlis);
+				formularDesc += ' + ' + formatMoney(~~(feeNationalShipObject.fee * weight_wjlis)) + 'đ';
+			}
+		}
+		
+		$('input#final_price').val(total_price_qadfe);
+		$('.formular_desc').text(formularDesc);
+		
+	}
+	
+</script>
+{% endblock %}

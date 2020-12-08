@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+	{% extends "./layout.html" %} {% block content %}
+	<section class="vbox">
+		<section class="scrollable padder">
+			<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+				<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+						quản trị</a></li>
+				<li><a href="#">Cấu hình tỷ giá tiền</a></li>
+			</ul>
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-xs-12 col-sm-12 col-md-12">
+						<section class="panel panel-default">
+							<header class="panel-heading font-bold">Cấu hình tỷ giá tiền</header>
+							<div class="table-responsive">
+								<table id="example_dtb"
+									class="table table-striped m-b-none dataTable no-footer"
+									style="width: 100%">
+									<thead>
+										<tr>
+											<th>Loại tiền nguồn</th>
+											<th>Loại tiền đích</th>
+											<th>Tỷ giá</th>
+											<th>Thao tác</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+		</section>
+	</section>
+
+	<div class="modal fade" id="modal-form">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="row">
+						<div class="col-sm-12 b-r">
+							<h3 class="m-t-none m-b">Tỷ giá tiền tệ</h3>
+							<form id="currencyForm" data-method="POST"
+								data-action="/admin/currency-rate" role="form">
+								<input type="hidden" name="csrf_token"
+													value="{{ csrf_token() }}">
+								<input class="data-hidden" name="id" id="id" type="hidden">
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-6">
+										<label>Mã tiền nguồn</label> <input id="source" name="source" type="text"
+											class="form-control parsley-validated" placeholder="Eg: usd"
+											data-required="true">
+									</div>
+									<div class="col-sm-6">
+										<label>Tên tiền nguồn</label> <input id="source_name"
+											type="text" name="source_name" class="form-control parsley-validated"
+											placeholder="Eg: Đô la mỹ" data-required="true">
+									</div>
+								</div>
+								<div class="form-group pull-in clearfix">
+									<div class="col-sm-6">
+										<label>Mã tiền đích</label> <input id="destination"
+											type="text" name="destination" class="form-control parsley-validated"
+											placeholder="Eg: vnd" data-required="true">
+									</div>
+									<div class="col-sm-6">
+										<label>Tên tiền đích</label> <input id="destination_name"
+											type="text" name="destination_name" class="form-control parsley-validated"
+											placeholder="Eg: Việt Nam đồng" ata-required="true">
+									</div>
+								</div>
+								<div class="form-group">
+									<label>Tỷ giá</label> <input type="text" id="rate"
+										class="form-control" name="rate" placeholder="Eg: 22800">
+								</div>
+								<div class="checkbox m-t-lg">
+									<button onclick="business_function.submitCurrencyForm('currencyForm');"
+										type="button"
+										class="btn btn-sm btn-success pull-right text-uc m-t-n-xs">
+										<strong>Submit</strong>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
+	<script type="text/javascript">
+		var arrayLoaded = [];
+		
+		$(function() {
+			$('#example_dtb')
+					.DataTable(
+							{
+								"bProcessing" : true,
+								"sDom" : "<'row'<'col-sm-6'l><'col-sm-6'f>r>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
+								"sPaginationType" : "full_numbers",
+								ajax : {
+									url : '/admin/list_currency',
+									type : "POST",
+									data : function(d) {
+										return $.extend({}, d, {
+											"csrf_token" : '{{ csrf_token() }}'
+										});
+									},
+									"dataSrc" : function(json) {
+										//arrayLoaded = json.data;
+										arrayLoaded = json.data;
+										return json.data;
+									}
+								},
+								columns : [
+										{
+											"data" : "source",
+											render : function(data, type, row) {
+												return row.source_name + ' ('
+														+ row.source + ')';
+											}
+										},
+										{
+											"data" : "destination",
+											render : function(data, type, row) {
+												return row.destination_name
+														+ ' ('
+														+ row.destination + ')';
+											}
+										},
+										{
+											"data" : "rate",
+											render : function(data, type, row) {
+												return row.rate
+											}
+										},
+										{
+											"data" : "",
+											render : function(data, type, row) {
+												var html = '<b style="display:none">'
+														+ row.type
+														+ '</b><a class="btn btn-default btn-xs active" onclick="EditRecord('
+														+ row.id
+														+ ')" href="javascript:;"><i class="fa fa-edit"></i></a>';
+												html += '<b style="display:none">'
+														+ row.type
+														+ '</b><a class="btn btn-default btn-xs m-l-5" href="/admin/fee-config?type='
+														+ row.type
+														+ '"><i class="fa fa-times"></i></a>';
+												return html;
+											}
+										} ],
+								"fnDrawCallback" : function(oSettings) {
+
+								}
+							});
+		});
+		function EditRecord(id) {
+			var editObject = arrayLoaded.find(function(el) {
+				return el.id === id;
+			});
+			if (!editObject)
+				return;
+
+			for ( var key in editObject) {
+				$('#modal-form #' + key).val(editObject[key]);
+			}
+			$('#modal-form').modal('show');
+		}
+	</script>
+	{% endblock %}
+</body>
+</html>

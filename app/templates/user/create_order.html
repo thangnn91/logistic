@@ -1,0 +1,160 @@
+{% extends "./user_layout.html" %} {% block content %}
+<section class="vbox">
+	<section class="scrollable padder">
+		<ul class="breadcrumb no-border no-radius b-b b-light pull-in">
+			<li><a href="/dashboard"><i class="fa fa-home"></i> Trang
+					chủ</a></li>
+			<li><a href="#">Đặt hàng</a></li>
+		</ul>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-xs-12 col-sm-12 col-md-12">
+					<section class="panel panel-default">
+						<header class="panel-heading font-bold">Tạo đơn hàng</header>
+						<div class="panel-body">
+							<div id="created_order_form" data-method="POST"
+								data-action="/dashboard/create-order">
+								<input type="hidden" name="csrf_token"
+									value="{{ csrf_token() }}">
+								<div id="default_item" class="order_item">
+									<div class="error-item panel bg bg-danger text-sm m-b-none">
+										<div class="panel-body">
+											<span class="arrow right"></span>
+											<p class="m-b-none">Vui lòng điền đầy đủ các thông tin</p>
+										</div>
+									</div>
+									<div class="row m-t-sm">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Tên sản phẩm</label><input maxlength="300"
+													type="text" class="form-control item_name"
+													placeholder="Eg: Nike/耐克男装JORDAN卫衣2019秋冬新款运动篮球套头衫外套BV6011"
+													value="">
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Link sản phẩm</label><input maxlength="300"
+													type="text" class="form-control item_link"
+													placeholder="Eg: https://detail.tmall.com/item.htm"
+													value="">
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Màu sắc</label><input maxlength="100" type="text"
+													placeholder="Eg: Xám" class="form-control item_color"
+													value="">
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Size/kích thước</label><input maxlength="100"
+													type="text" placeholder="Eg: XL"
+													class="form-control item_size" value="">
+											</div>
+										</div>
+									</div>
+
+
+									<div class="row">
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Số lượng</label><input maxlength="10" type="text"
+													onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/\D/g, '');"
+													placeholder="Eg: 2" class="form-control item_quantity"
+													value="">
+											</div>
+										</div>
+										<div class="col-md-6">
+											<div class="form-group">
+												<label>Giá sản phẩm</label>
+												<div class="input-group">
+													<input type="text" maxlength="10"
+														class="form-control item_price"
+														onkeyup="if (/\D/g.test(this.value))
+                                							this.value = this.value.replace(/[^0-9.]+/g, '');"
+														placeholder="Eg: 359.00" value="">
+													<div class="input-group-btn input-group-btn-select">
+														<select id="currency" class="form-control m-b">
+															<option value="1" selected="selected">¥ (tệ)</option>
+															<option value="2">USD (đô la Mỹ)</option>
+														</select>
+													</div>
+													<!-- /btn-group -->
+												</div>
+
+											</div>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Link ảnh/upload ảnh sp</label>
+										<div class="input-group div_file">
+											<input maxlength="500" type="text"
+												placeholder="Eg: https://img.alicdn.com/imgextra/i4/2148274655/O1CN01RCntwF1kG2G5qoyd2_!!0-item_pic.jpg_430x430q90.jpg"
+												class="form-control file_name"> <span
+												class="input-group-btn"> <input type="file"
+												onchange="onchangeFile(this);"
+												accept="image/x-png,image/gif,image/jpeg" class="filestyle"
+												data-icon="false" data-classbutton="btn btn-default"
+												data-classinput="form-control inline input-s"
+												id="filestyle-0" style="display: none;">
+												<button class="btn btn-default" onclick="selectFile(this);"
+													type="button">Upload</button>
+											</span>
+										</div>
+									</div>
+									<div class="form-group">
+										<label>Mô tả</label>
+										<textarea rows="4" maxlength="500"
+											class="form-control item_desc" cols=""></textarea>
+									</div>
+									<div class="line line-dashed line-lg pull-in"></div>
+								</div>
+							</div>
+							<button
+								onclick="business_function.createOrder('created_order_form');"
+								type="button" id="submit_form" class="btn btn-sm btn-default">Tạo
+								đơn hàng</button>
+							<a href="javascript:;" onclick="addItem();"
+								class="btn btn-sm btn-warning pull-right">Thêm sản phẩm</a>
+						</div>
+					</section>
+				</div>
+			</div>
+		</div>
+	</section>
+</section>
+<script type="text/javascript">
+	function addItem() {
+		var d = document.createElement('div');
+		$(d).addClass('order_item').html(
+				"<div class='row'><a href=javascript:; class='close-order'>x</a></div>"
+						+ $('#default_item').html()).appendTo(
+				$("#created_order_form"))
+	}
+
+	$('#created_order_form').on('click', '.close-order', function() {
+		$(this).parent().parent('.order_item').remove();
+	});
+
+	$('#created_order_form input').bind('keypress', function(e) {
+		$('.error-item').hide();
+	});
+
+	function selectFile(t) {
+		$(t).parents('.div_file').find('input[type=file]').click();
+	}
+
+	function onchangeFile(t) {
+		var file = $(t)[0].files[0];
+		if (file) {
+			$(t).parents('.div_file').find('input.file_name').val(file.name);
+		}
+	}
+</script>
+{% endblock %}
